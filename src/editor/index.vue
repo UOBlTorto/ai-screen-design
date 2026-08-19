@@ -9,7 +9,7 @@
             <!-- material  -->
             <MaterialPanel class="material w-256 overflow-hidden" :style="{width:materialWidth}"/>
             <!-- layer -->
-            <aside class="layer w-156 overflow-hidden" :style="{width:layerWidth}">layer</aside>
+            <LayerPanel class="layer w-156 overflow-hidden" :style="{width:layerWidth}"/>
             <!-- canvas -->
             <div class="canvas flex-1">canvas</div>
             <!-- property -->
@@ -23,6 +23,7 @@ import { useEditorStore } from '@/stores/editor.ts';
 import ToolbarLeft from './toolbar/ToolbarLeft.vue';
 import ToolbarRight from './toolbar/ToolbarRight.vue';
 import MaterialPanel from '../editor/panels/material/index.vue'
+import LayerPanel from '../editor/panels/layer/index.vue'
 
 defineOptions({
     name: 'ScreenEditor'
