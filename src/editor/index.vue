@@ -1,5 +1,5 @@
 <template>
-    <div class="editor h-screen">
+    <div class="editor h-screen select-none">
         <header class="h-56 header flex items-center px-20">
             <ToolbarLeft class="w-300"/>
             <div class="flex-1 text-center">title</div>
@@ -11,7 +11,7 @@
             <!-- layer -->
             <LayerPanel class="layer w-156 overflow-hidden" :style="{width:layerWidth}"/>
             <!-- canvas -->
-            <div class="canvas flex-1">canvas</div>
+            <CanvasRoot class="canvas flex-1"/>
             <!-- property -->
             <aside class="property w-260 overflow-hidden" :style="{width:propertyWidth}">propertery</aside>
         </main>
@@ -24,7 +24,7 @@ import ToolbarLeft from './toolbar/ToolbarLeft.vue';
 import ToolbarRight from './toolbar/ToolbarRight.vue';
 import MaterialPanel from '../editor/panels/material/index.vue'
 import LayerPanel from '../editor/panels/layer/index.vue'
-
+import CanvasRoot from '../editor/canvas/index.vue'
 defineOptions({
     name: 'ScreenEditor'
 })

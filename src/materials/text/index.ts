@@ -1,5 +1,5 @@
 import type { MaterialDefinition } from '../type'
-
+import TextMatetial from './component.vue'
 const textMaterial: MaterialDefinition = {
   name: '文本',
   group: 'info',
@@ -24,5 +24,5 @@ const textMaterial: MaterialDefinition = {
   },
 }
 export function install(register) {
-  register(textMaterial)
+  register(textMaterial,TextMatetial)
 }

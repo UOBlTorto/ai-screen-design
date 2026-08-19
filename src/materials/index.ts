@@ -1,10 +1,17 @@
+import type { MaterialDefinition } from "./type"
+
 // 拓展物料面板-物料
 const materials = []
 /**
  * 扩展|注册 物料的方法
+ * 
+ * 类型text-->TextMaterial组件
+ * 类型charts-->ChartsMaterial组件
  */
-function register(material){
+const componentMap = new Map()
+function register(material:MaterialDefinition,component:Component){
     materials.push(material)
+    componentMap.set(material.schema.type,component)
 }
 const materiaMosdulel = import.meta.glob('@/materials/*/*.ts',{eager:true})
 for(const key in materiaMosdulel){
@@ -38,4 +45,21 @@ export function getMaterialsByGroup(activeGroup: string) {
  */
 export function getGroups() {
   return groups
+}
+
+/**
+ * 查物料对应组件
+ */
+export function getComponent(type:string){
+  return componentMap.get(type)
+}
+
+/**
+ * 创建物料节点
+ */
+export function createnode(node){
+    return {
+        ...node,
+        id:crypto.randomUUID()
+    }
 }

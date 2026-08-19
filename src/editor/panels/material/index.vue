@@ -25,12 +25,11 @@ defineOptions({
     name: 'MaterialPanel'
 })
 // 被激活的分组
-const activeGroup = ref('charts')
+const activeGroup = ref('info')
 
 // 拓展物料面板-分类
 const groups = getGroups()
 const curMateriali = computed(()=>getMaterialsByGroup(activeGroup.value))
-console.log(curMateriali)
 </script>
 
 <style scoped lang="scss">
