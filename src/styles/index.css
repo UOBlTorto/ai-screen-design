@@ -1,5 +1,6 @@
 @import "tailwindcss";
-
-@theme{
+@import './variable.scss';
+@import './global.scss';
+@theme {
     --spacing: 1px;
 }
