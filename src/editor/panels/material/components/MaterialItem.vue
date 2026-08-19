@@ -1,8 +1,8 @@
 <template>
     <div class="material-item">
-        <div class="title">柱状图</div>
+        <div class="title">{{ material.name }}</div>
         <div class="icon">
-            <Icon icon="fluent-color:list-bar-16" width="80"></Icon>
+            <Icon :icon="material.icon" width="80"></Icon>
         </div>
     </div>
 </template>
@@ -11,6 +11,7 @@
 defineOptions({
     name:'MaterialItem'
 })
+defineProps(['material'])
 </script>
 
 <style scoped lang="scss">

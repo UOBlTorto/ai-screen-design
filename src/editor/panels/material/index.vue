@@ -1,31 +1,36 @@
 <template>
     <div class="material-panel flex">
         <div class="nav w-56">
-            <div class="active">
+            <div :class="{ active: activeGroup === groupItem.key }" @click="() => activeGroup = groupItem.key"
+                v-for="groupItem in groups" :key="groupItem.name">
                 <span>
-                    <Icon icon="solar:chart-bold"></Icon>
+                    <Icon :icon="groupItem.icon"></Icon>
                 </span>
-                <span>图表</span>
+                <span>{{ groupItem.name }}</span>
             </div>
-            <div>
-                <span>
-                    <Icon icon="ant-design:form-outlined"></Icon>
-                </span>
-                <span>表单</span>
-            </div>
+
         </div>
         <div class="material-list flex-1 p-10 overflow-auto">
-            <MaterialItem class="mt-10" v-for="value in 20" :key="value"/>
+            <MaterialItem class="mt-10" v-for="materialItem in curMateriali" :key="materialItem.name"
+                :material="materialItem" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { getGroups, getMaterialsByGroup } from '@/materials/index.ts';
 import MaterialItem from './components/MaterialItem.vue';
 
 defineOptions({
     name: 'MaterialPanel'
 })
+// 被激活的分组
+const activeGroup = ref('charts')
+
+// 拓展物料面板-分类
+const groups = getGroups()
+const curMateriali = computed(()=>getMaterialsByGroup(activeGroup.value))
+console.log(curMateriali)
 </script>
 
 <style scoped lang="scss">
@@ -36,6 +41,7 @@ defineOptions({
         border-right: 1px solid var(--border-color);
 
         div {
+            cursor: pointer;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -48,7 +54,8 @@ defineOptions({
             }
         }
     }
-    .material-list{
+
+    .material-list {
         scrollbar-color: #446b6b transparent;
         scrollbar-width: auto;
     }
