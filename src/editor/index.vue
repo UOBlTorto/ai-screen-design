@@ -2,17 +2,18 @@
     <div class="editor h-screen">
         <header class="h-56 header flex items-center px-20">
             <ToolbarLeft class="w-300"/>
+            <div class="flex-1 text-center">title</div>
             <ToolbarRight class="w-300"/>
         </header>
         <main class="editor-main flex">
             <!-- material  -->
-            <aside class="w-256 overflow-hidden" :style="{width:materialWidth}">material</aside>
+            <aside class="material w-256 overflow-hidden" :style="{width:materialWidth}">material</aside>
             <!-- layer -->
-            <aside class="w-156 overflow-hidden" :style="{width:layerWidth}">layer</aside>
+            <aside class="layer w-156 overflow-hidden" :style="{width:layerWidth}">layer</aside>
             <!-- canvas -->
             <div class="canvas flex-1">canvas</div>
-            <!-- propertery -->
-            <aside class="w-260 overflow-hidden" :style="{width:propertyWidth}">propertery</aside>
+            <!-- property -->
+            <aside class="property w-260 overflow-hidden" :style="{width:propertyWidth}">propertery</aside>
         </main>
     </div>
 </template>

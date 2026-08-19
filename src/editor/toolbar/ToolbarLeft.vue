@@ -25,7 +25,6 @@
 
 <script lang="ts" setup>
 import { useEditorStore } from '@/stores/editor';
-import { Icon } from '@iconify/vue'
 
 defineOptions({
     name: 'ToolBarLeft'
