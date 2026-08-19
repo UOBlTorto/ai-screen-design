@@ -1,3 +1,4 @@
+import type { MaterialSchema } from '@/materials/type'
 import { defineStore } from 'pinia'
 
 export const useEditorStore = defineStore('editor', () => {
@@ -7,6 +8,22 @@ export const useEditorStore = defineStore('editor', () => {
     layer: true,
     property: true,
   })
-
-  return { panelVisible }
+  // 选中节点拖放和缩放相关变量
+  const nodes = ref<MaterialSchema[]>([])
+const selectedNodeId = ref()
+const selectedNode = computed(() => nodes.value.find(item => item.id === selectedNodeId.value))
+function addNode(node:MaterialSchema){
+  nodes.value.push(node)
+}
+function selectNode(id:string){
+  selectedNodeId.value = id
+}
+  return { 
+    panelVisible,
+    nodes,
+    selectedNode,
+    selectedNodeId,
+    addNode,
+    selectNode
+   }
 })
