@@ -1,10 +1,21 @@
-import type { MaterialDefinition } from '../type'
+import type { MaterialDefinition } from '@/schema/material.ts'
 import TextMatetial from './component.vue'
 const textMaterial: MaterialDefinition = {
   name: '文本',
   group: 'info',
   icon: 'solar:text-bold',
   // 。。。
+  setters:[
+    {
+      key:'props.content',
+      type: 'input',
+      label:'内容',
+    },{
+      key:'style.color',
+      type:'color',
+      label:'颜色'
+    }
+  ],
   schema: {
     // dsl
     type: 'text',
