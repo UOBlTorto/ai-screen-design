@@ -27,7 +27,7 @@ export const useEditorStore = defineStore('editor', () => {
   // 选中节点拖放和缩放相关变量----单选
   const nodes = toRef(page.value,'nodes')
   const selectedNodeIdList = ref<string[]>([])
-  const selectedNodeId = computed(()=>selectedNodeIdList.value.length === 1?selectedNodeIdList[0]:null)
+  const selectedNodeId = computed(()=>selectedNodeIdList.value.length === 1?selectedNodeIdList.value[0]:null)
   const selectedNode = computed(() => nodes.value.find((item) => item.id === selectedNodeId.value))
 
   function addNode(node: MaterialSchema) {

@@ -13,7 +13,7 @@
             <!-- canvas -->
             <CanvasRoot class="canvas flex-1"/>
             <!-- property -->
-            <PropertyPanel class="property w-260 overflow-hidden" :style="{width:propertyWidth}"/>
+            <PropertyPanel class="property overflow-hidden" :style="{width:propertyWidth}"/>
         </main>
     </div>
 </template>
@@ -32,7 +32,7 @@ defineOptions({
 const editorStore = useEditorStore()
 const materialWidth = computed(()=>editorStore.panelVisible.material?'260px':'0')
 const layerWidth = computed(()=>editorStore.panelVisible.layer?'160px':'0')
-const propertyWidth = computed(()=>editorStore.panelVisible.property?'260px':'0')
+const propertyWidth = computed(()=>editorStore.panelVisible.property?'360px':'0')
 </script>
 
 <style scoped lang="scss">

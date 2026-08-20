@@ -27,7 +27,7 @@ const textMaterial: MaterialDefinition = {
       y: 0,
     },
     style: {
-      color: 'black',
+      color: '#fff',
     },
     props: {
       content: 'hello',
