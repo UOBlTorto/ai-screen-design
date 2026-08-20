@@ -5,10 +5,22 @@
             :canvas-height="canvasHeight" :lines :scale @zoomchange="onZoomChange">
             <div class="canvas-stage" :style="canvasStyle" ref="stage" @dragover.prevent @drop="onDrop"
                 @mousedown.self="onClearSelected">
-                <div class="canvas-node" :data-node-id="nodeItem.id" @mousedown="onSelect(nodeItem, $event)"
-                    v-for="(nodeItem,index) in nodes" :key="nodeItem.id" :style="getNodeStyle(nodeItem,index)">
-                    <component :is="getComponent(nodeItem.type)" :schema="nodeItem"></component>
-                </div>
+                <el-dropdown @command="onCommand" v-for="(nodeItem, index) in nodes" :key="nodeItem.id"
+                    trigger="contextmenu">
+                    <div class="canvas-node" :data-node-locked="nodeItem.locked" :data-node-id="nodeItem.id"
+                        @mousedown="onSelect(nodeItem, $event)" :style="getNodeStyle(nodeItem, index)">
+                        <component :is="getComponent(nodeItem.type)" :schema="nodeItem"></component>
+                    </div>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item command="copy">复制</el-dropdown-item>
+                            <el-dropdown-item command="remove">移除</el-dropdown-item>
+                            <el-dropdown-item command="moveTop">置顶</el-dropdown-item>
+                            <el-dropdown-item command="moveBottom">置底</el-dropdown-item>
+                            <el-dropdown-item command="toggleLock">{{ nodeItem.locked ? '解锁' : '锁定' }}</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
             </div>
         </SketchRuler>
 
@@ -35,8 +47,8 @@ defineOptions({
 })
 
 const selectedTarget = shallowRef<HTMLElement[]>()
-const editorSotre = useEditorStore()
-const { nodes, selectedNodeIdList, canvas } = storeToRefs(editorSotre)
+const editorStore = useEditorStore()
+const { nodes, selectedNodeIdList, canvas } = storeToRefs(editorStore)
 
 function onDrop(e: DragEvent) {
     /*
@@ -60,9 +72,9 @@ function onDrop(e: DragEvent) {
     // HACK: 放开的位置就是XY轴
     node.layout.x = e.offsetX - node.layout.width / 2
     node.layout.y = e.offsetY - node.layout.height / 2
-    editorSotre.addNode(node)
+    editorStore.addNode(node)
     // HACK: 拖过来就能选中
-    editorSotre.selectNode(node.id)
+    editorStore.selectNode(node.id)
     // nextTick(() => {
     //     selectedTarget.value = vm.proxy.$el.querySelector(`[data-node-id='${node.id}']`)
     // })
@@ -72,13 +84,13 @@ function onDrop(e: DragEvent) {
  * 节点拖放和缩放 
  */
 // ===========获取节点样式=========================
-function getNodeStyle(node: MaterialSchema,index:number) {
+function getNodeStyle(node: MaterialSchema, index: number) {
     return {
         width: node.layout.width + 'px',
         height: node.layout.height + 'px',
         top: node.layout.y + 'px',
         left: node.layout.x + 'px',
-        zIndex: index+1,
+        zIndex: index + 1,
     }
 }
 // ===========鼠标按下，选中节点=========================
@@ -87,7 +99,7 @@ function getNodeStyle(node: MaterialSchema,index:number) {
 // const selectedNode = computed(() => nodes.value.find(item => item.id === selectedNodeId.value))
 const moveableRef = useTemplateRef('moveable')
 function onSelect(node: MaterialSchema, e: MouseEvent) {
-    editorSotre.selectNode(node.id)
+    editorStore.selectNode(node.id)
     // HACK: 第一次选中识别不到
     nextTick(() => {
         moveableRef.value.dragStart(e)
@@ -121,7 +133,7 @@ function onResize(e: OnResize) {
 }
 // =========点击画布让选中的元素清空==================
 function onClearSelected() {
-    editorSotre.clearSelected()
+    editorStore.clearSelected()
 }
 
 /**
@@ -132,7 +144,7 @@ const stageRef = useTemplateRef('stage')
 function onSelectEnd(e) {
     // 获取Id
     const idList = e.selected.map(ele => ele.getAttribute('data-node-id'))
-    editorSotre.selectedNodes(idList)
+    editorStore.selectedNodes(idList)
 }
 // 框选后成组拖拽
 function onDragGroup(e: OnDragGroup) {
@@ -141,7 +153,7 @@ function onDragGroup(e: OnDragGroup) {
 // 框选辅助方法-根据ele获取id,然后根据Id获取node
 function getNodeByTarget(ele: HTMLElement) {
     const id = ele.getAttribute('data-node-id')
-    const node = editorSotre.findNode(id)
+    const node = editorStore.findNode(id)
     return node
 }
 // 框选后成组缩放
@@ -196,8 +208,8 @@ onMounted(() => {
 function onZoomChange() {
     moveableRef.value.updateRect()//更新选框的方法
 }
-const canvasWidth = toRef(canvas.value,'width')
-const canvasHeight = toRef(canvas.value,'height')
+const canvasWidth = toRef(canvas.value, 'width')
+const canvasHeight = toRef(canvas.value, 'height')
 const canvasStyle = computed(() => {
     return {
         width: canvasWidth.value + 'px',
@@ -211,8 +223,25 @@ const canvasStyle = computed(() => {
  */
 // HACK：点击图层的节点更新的是Id，但是没有更新selectedTarget，所以不能选中
 watch(selectedNodeIdList, (idList) => {
-    selectedTarget.value = idList.map(id => stageRef.value.querySelector(`[data-node-id='${id}']`))
+    selectedTarget.value = idList.map(id => stageRef.value.querySelector(`[data-node-id='${id}']:not([data-node-locked='true'])`))
 }, { deep: true, flush: 'post' })
+
+/**
+ * 右键功能
+ */
+const commandMap = {
+    copy:()=>editorStore.copyNode(editorStore.selectedNode),
+    remove:()=>editorStore.removeNode(editorStore.selectedNode),
+    moveBottom:()=>editorStore.moveTop(editorStore.selectedNode),
+    moveTop:()=>editorStore.moveBottom(editorStore.selectedNode),
+    toggleLock:()=>{
+        editorStore.toggleLock(editorStore.selectedNode)
+        selectedTarget.value = []
+    }
+}
+function onCommand(command:string){
+    commandMap[command]()
+}
 </script>
 
 <style scoped lang="scss">
