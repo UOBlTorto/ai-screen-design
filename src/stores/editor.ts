@@ -10,24 +10,24 @@ export const useEditorStore = defineStore('editor', () => {
     property: true,
   })
 
-  
   // 页面page的DSL、schema设置、获取
   const page = ref<PageSchema>({
-    canvas:{
-      width:1920,
-      height:1080,
-      backgroundColor:'#0d121b'
+    canvas: {
+      width: 1920,
+      height: 1080,
+      backgroundColor: '#0d121b',
     },
     // 这个nodes理论上和上面那个nodes一样，但是我们把这里聚合起来
-    nodes:[],
+    nodes: [],
   })
-  const canvas = toRef(page.value,'canvas')
-
+  const canvas = toRef(page.value, 'canvas')
 
   // 选中节点拖放和缩放相关变量----单选
-  const nodes = toRef(page.value,'nodes')
+  const nodes = toRef(page.value, 'nodes')
   const selectedNodeIdList = ref<string[]>([])
-  const selectedNodeId = computed(()=>selectedNodeIdList.value.length === 1?selectedNodeIdList.value[0]:null)
+  const selectedNodeId = computed(() =>
+    selectedNodeIdList.value.length === 1 ? selectedNodeIdList.value[0] : null,
+  )
   const selectedNode = computed(() => nodes.value.find((item) => item.id === selectedNodeId.value))
 
   function addNode(node: MaterialSchema) {
@@ -37,17 +37,47 @@ export const useEditorStore = defineStore('editor', () => {
     // selectedNodeId.value = id
     selectedNodeIdList.value = [id]
   }
-  function clearSelected(){
+  function clearSelected() {
     selectedNodeIdList.value = []
   }
   // 选中节点拖放和缩放相关变量------多选
-  function selectedNodes(idList:string[]){
+  function selectedNodes(idList: string[]) {
     selectedNodeIdList.value = idList
   }
-  function findNode(id){
-    return nodes.value.find(item=>item.id===id)
+  function findNode(id) {
+    return nodes.value.find((item) => item.id === id)
   }
 
+  /**
+   * 右键菜单功能
+   * */
+  function copyNode(node: MaterialSchema) {
+    // 拷贝
+    const newNode = JSON.parse(JSON.stringify(node))
+    newNode.id = crypto.randomUUID()
+    // 偏移
+    newNode.layout.x += 20
+    newNode.layout.y += 20
+    addNode(newNode)
+    selectNode(newNode.id)
+  }
+  function removeNode(node: MaterialSchema) {
+    nodes.value = nodes.value.filter((item) => item.id !== node.id)
+    selectedNodeIdList.value = selectedNodeIdList.value.filter((id) => id !== node.id)
+  }
+  function moveTop(node: MaterialSchema) {
+    const index = nodes.value.findIndex((item) => item.id === node.id)
+    nodes.value.splice(index, 1)
+    nodes.value.unshift(node)
+  }
+  function moveBottom(node: MaterialSchema) {
+    const index = nodes.value.findIndex((item) => item.id === node.id)
+    nodes.value.splice(index, 1)
+    nodes.value.push(node)
+  }
+  function toggleLock(node: MaterialSchema) {
+    node.locked = !node.locked
+  }
 
   return {
     canvas,
@@ -63,6 +93,12 @@ export const useEditorStore = defineStore('editor', () => {
     findNode,
     addNode,
     selectNode,
-    clearSelected
+    clearSelected,
+
+    copyNode,
+    moveBottom,
+    moveTop,
+    toggleLock,
+    removeNode,
   }
 })
