@@ -1,17 +1,21 @@
 <template>
-    <div class="canvas-root">
+    <div class="canvas-root" ref="canvasRoot">
         <!-- 画布主体 -->
-        <div class="canvas-stage" ref="stage" @dragover.prevent @drop="onDrop" @mousedown.self="onClearSelected">
-            <div class="canvas-node" :data-node-id="nodeItem.id" @mousedown="onSelect(nodeItem, $event)"
-                v-for="nodeItem in nodes" :key="nodeItem.id" :style="getNodeStyle(nodeItem)">
-                <component :is="getComponent(nodeItem.type)" :schema="nodeItem"></component>
+        <SketchRuler :palette :width="canvasRootWidth" :height="canvasRootHeight" :canvas-width="canvasWidth"
+            :canvas-height="canvasHeight" :lines :scale @zoomchange="onZoomChange">
+            <div class="canvas-stage" :style="canvasStyle" ref="stage" @dragover.prevent @drop="onDrop" @mousedown.self="onClearSelected">
+                <div class="canvas-node" :data-node-id="nodeItem.id" @mousedown="onSelect(nodeItem, $event)"
+                    v-for="nodeItem in nodes" :key="nodeItem.id" :style="getNodeStyle(nodeItem)">
+                    <component :is="getComponent(nodeItem.type)" :schema="nodeItem"></component>
+                </div>
             </div>
-        </div>
+        </SketchRuler>
+
         <!-- 移动、缩放 节点 -->
         <Moveable ref="moveable" :target="selectedTarget" :origin="false" :draggable="true" @drag="onDrag"
-                    @drag-group="onDragGroup" @resize-group="onResizeGroup"    
-        :resizable="true" @resize="onResize"></Moveable>
-        <Selecto v-if="stageRef" :container="stageRef" :dragContainer="stageRef" :selectable-targets="['.canvas-node']" @select-end="onSelectEnd" :select-from-inside="false"></Selecto>
+            @drag-group="onDragGroup" @resize-group="onResizeGroup" :resizable="true" @resize="onResize"></Moveable>
+        <Selecto v-if="stageRef" :container="stageRef" :dragContainer="stageRef" :selectable-targets="['.canvas-node']"
+            @select-end="onSelectEnd" :select-from-inside="false"></Selecto>
     </div>
 </template>
 
@@ -22,6 +26,9 @@ import Moveable, { type OnDrag, type OnDragGroup, type OnResize, type OnResizeGr
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
 import Selecto from 'vue3-selecto'
+import SketchRuler from 'vue3-sketch-ruler'
+import 'vue3-sketch-ruler/lib/style.css'
+import { debounce } from '@/utils'
 defineOptions({
     name: 'CanvasRoot'
 })
@@ -123,37 +130,90 @@ function onClearSelected() {
  */
 // 框选后拿到选中的元素
 const stageRef = useTemplateRef('stage')
-function onSelectEnd(e){
+function onSelectEnd(e) {
     selectedTarget.value = e.selected
     // 获取Id
-    const idList = e.selected.map(ele=>ele.getAttribute('data-node-id'))
+    const idList = e.selected.map(ele => ele.getAttribute('data-node-id'))
     editorSotre.selectedNodes(idList)
 }
 // 框选后成组拖拽
-function onDragGroup(e:OnDragGroup){
+function onDragGroup(e: OnDragGroup) {
     e.events.forEach(onDrag)
 }
 // 框选辅助方法-根据ele获取id,然后根据Id获取node
-function getNodeByTarget(ele:HTMLElement){
+function getNodeByTarget(ele: HTMLElement) {
     const id = ele.getAttribute('data-node-id')
     const node = editorSotre.findNode(id)
     return node
 }
 // 框选后成组缩放
-function onResizeGroup(e:OnResizeGroup){
+function onResizeGroup(e: OnResizeGroup) {
     e.events.forEach(onResize)
 }
 
+/**
+ * 标尺卡功能
+ */
+const palette = {
+    bgColor: '#1f2937',
+    longfgColor: '#6b7280',
+    fontColor: '#9ca3af',
+    fontShadowColor: '#0e8da7',
+    shadowColor: 'rgba(14, 141, 167, 0.14)',
+    lineColor: '#22c55e',
+    lineType: 'solid',
+    lockLineColor: '#4b5563',
+    borderColor: '#374151',
+    hoverBg: '#111827',
+    hoverColor: '#ffffff',
+}
+const lines = ref({ h: [], v: [] })
+const scale = ref(1)
+const canvasRootRef = useTemplateRef('canvasRoot')
+const canvasRootWidth = ref(1000)
+const canvasRootHeight = ref(800)
+onMounted(() => {
+    canvasRootWidth.value = canvasRootRef.value.getBoundingClientRect().width
+    canvasRootHeight.value = canvasRootRef.value.getBoundingClientRect().height
+
+    //  监听dom属性的变化API
+    const ob = new ResizeObserver((entries) => {
+        const entry = entries[0]
+        const rect = entry.contentRect
+        onRootResize(rect)
+
+    })
+    const onRootResize = debounce((rect) => {
+        canvasRootWidth.value = rect.width
+        canvasRootHeight.value = rect.height
+    }, 300)
+    ob.observe(canvasRootRef.value)
+
+    
+    onUnmounted(()=>{
+        ob.disconnect()
+    })
+})
+// 移动画布让选框也跟着动
+function onZoomChange(){
+    moveableRef.value.updateRect()//更新选框的方法
+}
+const canvasWidth = ref(1920)
+const canvasHeight = ref(1080)
+const canvasStyle = computed(()=>{
+    return {
+        width:canvasWidth.value + 'px',
+        height:canvasHeight.value + 'px',
+    }
+})
 </script>
 
 <style scoped lang="scss">
 .canvas-root {
     .canvas-stage {
         position: relative;
-        width: 600px;
-        height: 500px;
         background: bg-mix(40%);
-        margin: 100px;
+        margin: 50px;
 
         .canvas-node {
             position: absolute;

@@ -9,7 +9,7 @@
             <!-- material  -->
             <MaterialPanel class="material w-256 overflow-hidden" :style="{width:materialWidth}"/>
             <!-- layer -->
-            <LayerPanel class="layer w-156 overflow-hidden" :style="{width:layerWidth}"/>
+            <LayerPanel class="layer overflow-hidden" :style="{width:layerWidth}"/>
             <!-- canvas -->
             <CanvasRoot class="canvas flex-1"/>
             <!-- property -->
@@ -30,7 +30,7 @@ defineOptions({
 })
 const editorStore = useEditorStore()
 const materialWidth = computed(()=>editorStore.panelVisible.material?'260px':'0')
-const layerWidth = computed(()=>editorStore.panelVisible.layer?'260px':'0')
+const layerWidth = computed(()=>editorStore.panelVisible.layer?'160px':'0')
 const propertyWidth = computed(()=>editorStore.panelVisible.property?'260px':'0')
 </script>
 
