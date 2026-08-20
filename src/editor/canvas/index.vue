@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { getComponent, createnode } from '@/materials'
-import type { MaterialSchema } from '@/materials/type'
+import type { MaterialSchema } from '@/schema/material'
 import Moveable, { type OnDrag, type OnDragGroup, type OnResize, type OnResizeGroup } from 'vue3-moveable'
 import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
@@ -36,7 +36,7 @@ defineOptions({
 
 const selectedTarget = shallowRef<HTMLElement[]>()
 const editorSotre = useEditorStore()
-const { nodes, selectedNodeIdList } = storeToRefs(editorSotre)
+const { nodes, selectedNodeIdList, canvas } = storeToRefs(editorSotre)
 
 function onDrop(e: DragEvent) {
     /*
@@ -196,12 +196,13 @@ onMounted(() => {
 function onZoomChange() {
     moveableRef.value.updateRect()//更新选框的方法
 }
-const canvasWidth = ref(1920)
-const canvasHeight = ref(1080)
+const canvasWidth = toRef(canvas.value,'width')
+const canvasHeight = toRef(canvas.value,'height')
 const canvasStyle = computed(() => {
     return {
         width: canvasWidth.value + 'px',
         height: canvasHeight.value + 'px',
+        backgroundColor: canvas.value.backgroundColor
     }
 })
 /**
@@ -218,7 +219,6 @@ watch(selectedNodeIdList, (idList) => {
 .canvas-root {
     .canvas-stage {
         position: relative;
-        background: bg-mix(40%);
         margin: 50px;
 
         .canvas-node {
