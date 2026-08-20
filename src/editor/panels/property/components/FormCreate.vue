@@ -6,7 +6,7 @@
                     <el-form-item :label="setterItem.label">
                         <component :is="componentMap[setterItem.type]"
                             :modelValue="getValue(selectedNode, setterItem.key)"
-                            @update:modelValue="(val) => setValue(selectedNode, setterItem.key, val)"></component>
+                            @update:modelValue="(val) => applyChange(selectedNode, setterItem.key, val)"></component>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -16,7 +16,8 @@
 
 <script setup lang="ts">
 import { ElColorPicker, ElInput, ElInputNumber } from 'element-plus';
-import { getValue, setValue } from '@/utils';
+import { getValue } from '@/utils';
+import { useUndoRedo } from '@/composables/useUndoRedo';
 
 defineOptions({
     name: 'FormCreate'
@@ -27,6 +28,8 @@ const componentMap = {
     number: (props) => h(ElInputNumber, { precision: 0, ...props }),
     color: ElColorPicker
 }
+// 撤销重做
+const { applyChange } = useUndoRedo()
 </script>
 
 <style scoped></style>

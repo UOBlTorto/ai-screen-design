@@ -14,17 +14,19 @@
 
             <Icon icon="fe:layer"></Icon>
         </span>
-        <span>
+        <span @click="undo" :class="{disabled:!canUndo}">
             <Icon icon="circum:undo"></Icon>
         </span>
-        <span>
+        <span @click="redo" :class="{disabled:!canRedo}">
             <Icon icon="circum:redo"></Icon>
         </span>
     </div>
 </template>
 
 <script lang="ts" setup>
+import { useUndoRedo } from '@/composables/useUndoRedo';
 import { useEditorStore } from '@/stores/editor';
+const { undo, redo, canRedo, canUndo } = useUndoRedo()
 
 defineOptions({
     name: 'ToolBarLeft'
