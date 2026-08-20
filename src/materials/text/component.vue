@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :style="{color:schema.style.color}">
         {{ schema.props.content }}
     </div>
 </template>

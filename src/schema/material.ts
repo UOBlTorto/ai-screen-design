@@ -15,7 +15,7 @@ export interface MaterialSchema {
     props: Record<string, any>
 }
 
-interface SetterSchema{
+export interface SetterSchema{
     key:string
     label:string
     type:string

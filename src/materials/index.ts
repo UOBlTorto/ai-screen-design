@@ -1,17 +1,23 @@
-import type { MaterialDefinition } from "./type"
+import type { MaterialDefinition } from "@/schema/material"
 
 // 拓展物料面板-物料
 const materials = []
 /**
  * 扩展|注册 物料的方法
  * 
+ * 取|存组件componentMap
  * 类型text-->TextMaterial组件
  * 类型charts-->ChartsMaterial组件
+ * 
+ * 取|存setters settersMap
+ * 类型text--》物料text的setters
  */
 const componentMap = new Map()
+const settersMap = new Map()
 function register(material:MaterialDefinition,component:Component){
     materials.push(material)
     componentMap.set(material.schema.type,component)
+    settersMap.set(material.schema.type,material.setters)
 }
 const materiaMosdulel = import.meta.glob('@/materials/*/*.ts',{eager:true})
 for(const key in materiaMosdulel){
@@ -52,6 +58,12 @@ export function getGroups() {
  */
 export function getComponent(type:string){
   return componentMap.get(type)
+}
+/**
+ * 查物料对应setters
+ */
+export function getSetters(type:string){
+  return settersMap.get(type)
 }
 
 /**

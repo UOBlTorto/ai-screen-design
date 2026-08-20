@@ -9,6 +9,13 @@
 export {}
 declare global {
   const EffectScope: typeof import('vue').EffectScope
+  const ElCol: typeof import('element-plus/es').ElCol
+  const ElColor: typeof import('element-plus/es').ElColor
+  const ElColorPicker: typeof import('element-plus/es').ElColorPicker
+  const ElI: typeof import('element-plus/es').ElI
+  const ElIn: typeof import('element-plus/es').ElIn
+  const ElInput: typeof import('element-plus/es').ElInput
+  const ElInputNumber: typeof import('element-plus/es').ElInputNumber
   const computed: typeof import('vue').computed
   const createApp: typeof import('vue').createApp
   const customRef: typeof import('vue').customRef
