@@ -1,4 +1,5 @@
-import type { MaterialSchema } from '@/materials/type'
+import type { MaterialSchema } from '@/schema/material'
+import type { PageSchema } from '@/schema/page'
 import { defineStore } from 'pinia'
 
 export const useEditorStore = defineStore('editor', () => {
@@ -8,8 +9,23 @@ export const useEditorStore = defineStore('editor', () => {
     layer: true,
     property: true,
   })
+
+  
+  // 页面page的DSL、schema设置、获取
+  const page = ref<PageSchema>({
+    canvas:{
+      width:1920,
+      height:1080,
+      backgroundColor:'#0d121b'
+    },
+    // 这个nodes理论上和上面那个nodes一样，但是我们把这里聚合起来
+    nodes:[],
+  })
+  const canvas = toRef(page.value,'canvas')
+
+
   // 选中节点拖放和缩放相关变量----单选
-  const nodes = ref<MaterialSchema[]>([])
+  const nodes = toRef(page.value,'nodes')
   const selectedNodeId = computed(()=>selectedNodeIdList.value.length === 1?selectedNodeIdList[0]:null)
   const selectedNode = computed(() => nodes.value.find((item) => item.id === selectedNodeId.value))
   const selectedNodeIdList = ref<string[]>([])
@@ -31,7 +47,12 @@ export const useEditorStore = defineStore('editor', () => {
   function findNode(id){
     return nodes.value.find(item=>item.id===id)
   }
+
+
   return {
+    canvas,
+    page,
+
     panelVisible,
     nodes,
     selectedNode,
