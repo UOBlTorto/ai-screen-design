@@ -13,7 +13,7 @@
             <!-- canvas -->
             <CanvasRoot class="canvas flex-1"/>
             <!-- property -->
-            <aside class="property w-260 overflow-hidden" :style="{width:propertyWidth}">propertery</aside>
+            <PropertyPanel class="property overflow-hidden" :style="{width:propertyWidth}"/>
         </main>
     </div>
 </template>
@@ -25,13 +25,14 @@ import ToolbarRight from './toolbar/ToolbarRight.vue';
 import MaterialPanel from '../editor/panels/material/index.vue'
 import LayerPanel from '../editor/panels/layer/index.vue'
 import CanvasRoot from '../editor/canvas/index.vue'
+import PropertyPanel from '../editor/panels/property/index.vue'
 defineOptions({
     name: 'ScreenEditor'
 })
 const editorStore = useEditorStore()
 const materialWidth = computed(()=>editorStore.panelVisible.material?'260px':'0')
 const layerWidth = computed(()=>editorStore.panelVisible.layer?'160px':'0')
-const propertyWidth = computed(()=>editorStore.panelVisible.property?'260px':'0')
+const propertyWidth = computed(()=>editorStore.panelVisible.property?'360px':'0')
 </script>
 
 <style scoped lang="scss">

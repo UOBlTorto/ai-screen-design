@@ -16,3 +16,4 @@
 
 补知识点：
 - CSS 属性选择器 [data-node-id='xxx']
+- number: (props) => h(ElInputNumber, { precision: 0, ...props }),
