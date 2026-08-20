@@ -3,9 +3,10 @@
         <!-- 画布主体 -->
         <SketchRuler :palette :width="canvasRootWidth" :height="canvasRootHeight" :canvas-width="canvasWidth"
             :canvas-height="canvasHeight" :lines :scale @zoomchange="onZoomChange">
-            <div class="canvas-stage" :style="canvasStyle" ref="stage" @dragover.prevent @drop="onDrop" @mousedown.self="onClearSelected">
+            <div class="canvas-stage" :style="canvasStyle" ref="stage" @dragover.prevent @drop="onDrop"
+                @mousedown.self="onClearSelected">
                 <div class="canvas-node" :data-node-id="nodeItem.id" @mousedown="onSelect(nodeItem, $event)"
-                    v-for="nodeItem in nodes" :key="nodeItem.id" :style="getNodeStyle(nodeItem)">
+                    v-for="(nodeItem,index) in nodes" :key="nodeItem.id" :style="getNodeStyle(nodeItem,index)">
                     <component :is="getComponent(nodeItem.type)" :schema="nodeItem"></component>
                 </div>
             </div>
@@ -32,11 +33,10 @@ import { debounce } from '@/utils'
 defineOptions({
     name: 'CanvasRoot'
 })
-const vm = getCurrentInstance()
 
-const selectedTarget = shallowRef<HTMLElement>()
+const selectedTarget = shallowRef<HTMLElement[]>()
 const editorSotre = useEditorStore()
-const { nodes } = storeToRefs(editorSotre)
+const { nodes, selectedNodeIdList } = storeToRefs(editorSotre)
 
 function onDrop(e: DragEvent) {
     /*
@@ -63,21 +63,22 @@ function onDrop(e: DragEvent) {
     editorSotre.addNode(node)
     // HACK: 拖过来就能选中
     editorSotre.selectNode(node.id)
-    nextTick(() => {
-        selectedTarget.value = vm.proxy.$el.querySelector(`[data-node-id='${node.id}']`)
-    })
+    // nextTick(() => {
+    //     selectedTarget.value = vm.proxy.$el.querySelector(`[data-node-id='${node.id}']`)
+    // })
 }
 /**
  * 功能点实现
  * 节点拖放和缩放 
  */
 // ===========获取节点样式=========================
-function getNodeStyle(node: MaterialSchema) {
+function getNodeStyle(node: MaterialSchema,index:number) {
     return {
         width: node.layout.width + 'px',
         height: node.layout.height + 'px',
         top: node.layout.y + 'px',
         left: node.layout.x + 'px',
+        zIndex: index+1,
     }
 }
 // ===========鼠标按下，选中节点=========================
@@ -86,7 +87,6 @@ function getNodeStyle(node: MaterialSchema) {
 // const selectedNode = computed(() => nodes.value.find(item => item.id === selectedNodeId.value))
 const moveableRef = useTemplateRef('moveable')
 function onSelect(node: MaterialSchema, e: MouseEvent) {
-    selectedTarget.value = e.currentTarget as HTMLElement
     editorSotre.selectNode(node.id)
     // HACK: 第一次选中识别不到
     nextTick(() => {
@@ -121,7 +121,6 @@ function onResize(e: OnResize) {
 }
 // =========点击画布让选中的元素清空==================
 function onClearSelected() {
-    selectedTarget.value = null
     editorSotre.clearSelected()
 }
 
@@ -131,7 +130,6 @@ function onClearSelected() {
 // 框选后拿到选中的元素
 const stageRef = useTemplateRef('stage')
 function onSelectEnd(e) {
-    selectedTarget.value = e.selected
     // 获取Id
     const idList = e.selected.map(ele => ele.getAttribute('data-node-id'))
     editorSotre.selectedNodes(idList)
@@ -189,23 +187,31 @@ onMounted(() => {
     }, 300)
     ob.observe(canvasRootRef.value)
 
-    
-    onUnmounted(()=>{
+
+    onUnmounted(() => {
         ob.disconnect()
     })
 })
 // 移动画布让选框也跟着动
-function onZoomChange(){
+function onZoomChange() {
     moveableRef.value.updateRect()//更新选框的方法
 }
 const canvasWidth = ref(1920)
 const canvasHeight = ref(1080)
-const canvasStyle = computed(()=>{
+const canvasStyle = computed(() => {
     return {
-        width:canvasWidth.value + 'px',
-        height:canvasHeight.value + 'px',
+        width: canvasWidth.value + 'px',
+        height: canvasHeight.value + 'px',
     }
 })
+/**
+ * 图层面板排序与画布联动
+ * 
+ */
+// HACK：点击图层的节点更新的是Id，但是没有更新selectedTarget，所以不能选中
+watch(selectedNodeIdList, (idList) => {
+    selectedTarget.value = idList.map(id => stageRef.value.querySelector(`[data-node-id='${id}']`))
+}, { deep: true, flush: 'post' })
 </script>
 
 <style scoped lang="scss">
