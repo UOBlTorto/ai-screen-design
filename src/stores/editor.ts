@@ -12,6 +12,8 @@ export const useEditorStore = defineStore('editor', () => {
   const nodes = ref<MaterialSchema[]>([])
   const selectedNodeId = computed(()=>selectedNodeIdList.value.length === 1?selectedNodeIdList[0]:null)
   const selectedNode = computed(() => nodes.value.find((item) => item.id === selectedNodeId.value))
+  const selectedNodeIdList = ref<string[]>([])
+
   function addNode(node: MaterialSchema) {
     nodes.value.push(node)
   }
@@ -20,10 +22,9 @@ export const useEditorStore = defineStore('editor', () => {
     selectedNodeIdList.value = [id]
   }
   function clearSelected(){
-    selectedNodeIdList.value = null
+    selectedNodeIdList.value = []
   }
   // 选中节点拖放和缩放相关变量------多选
-  const selectedNodeIdList = ref([])
   function selectedNodes(idList:string[]){
     selectedNodeIdList.value = idList
   }
