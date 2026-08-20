@@ -1,7 +1,7 @@
 <template>
     <div class="canvas-root">
         <!-- 画布主体 -->
-        <div class="canvas-stage" @dragover.prevent @drop="onDrop" @mousedown.self="onClearSelected">
+        <div class="canvas-stage" ref="stage" @dragover.prevent @drop="onDrop" @mousedown.self="onClearSelected">
             <div class="canvas-node" :data-node-id="nodeItem.id" @mousedown="onSelect(nodeItem, $event)"
                 v-for="nodeItem in nodes" :key="nodeItem.id" :style="getNodeStyle(nodeItem)">
                 <component :is="getComponent(nodeItem.type)" :schema="nodeItem"></component>
@@ -9,16 +9,19 @@
         </div>
         <!-- 移动、缩放 节点 -->
         <Moveable ref="moveable" :target="selectedTarget" :origin="false" :draggable="true" @drag="onDrag"
-            :resizable="true" @resize="onResize"></Moveable>
+                    @drag-group="onDragGroup" @resize-group="onResizeGroup"    
+        :resizable="true" @resize="onResize"></Moveable>
+        <Selecto v-if="stageRef" :container="stageRef" :dragContainer="stageRef" :selectable-targets="['.canvas-node']" @select-end="onSelectEnd" :select-from-inside="false"></Selecto>
     </div>
 </template>
 
 <script setup lang="ts">
 import { getComponent, createnode } from '@/materials'
 import type { MaterialSchema } from '@/materials/type'
-import Moveable, { type OnDrag, type OnResize } from 'vue3-moveable'
-import {useEditorStore} from '@/stores/editor.ts'
+import Moveable, { type OnDrag, type OnDragGroup, type OnResize, type OnResizeGroup } from 'vue3-moveable'
+import { useEditorStore } from '@/stores/editor.ts'
 import { storeToRefs } from 'pinia'
+import Selecto from 'vue3-selecto'
 defineOptions({
     name: 'CanvasRoot'
 })
@@ -26,7 +29,7 @@ const vm = getCurrentInstance()
 
 const selectedTarget = shallowRef<HTMLElement>()
 const editorSotre = useEditorStore()
-const {selectedNodeId,selectedNode,nodes} = storeToRefs(editorSotre)
+const { nodes } = storeToRefs(editorSotre)
 
 function onDrop(e: DragEvent) {
     /*
@@ -77,29 +80,34 @@ function getNodeStyle(node: MaterialSchema) {
 const moveableRef = useTemplateRef('moveable')
 function onSelect(node: MaterialSchema, e: MouseEvent) {
     selectedTarget.value = e.currentTarget as HTMLElement
-editorSotre.selectNode(node.id)
+    editorSotre.selectNode(node.id)
     // HACK: 第一次选中识别不到
-    nextTick(()=>{
+    nextTick(() => {
         moveableRef.value.dragStart(e)
     })
 }
 // ==========moveable第三方组件的拖动事件================
 function onDrag(e: OnDrag) {
     // HACK: 移动时机早于 异步的页面更新，导致文字超出框
-    selectedTarget.value.style.left = e.left + 'px'
-    selectedTarget.value.style.top = e.top + 'px'
+    e.target.style.left = e.left + 'px'
+    e.target.style.top = e.top + 'px'
 
-    selectedNode.value.layout.x = e.left
-    selectedNode.value.layout.y = e.top
+    const node = getNodeByTarget(e.target as HTMLElement)
+
+    node.layout.x = e.left
+    node.layout.y = e.top
 }
 // ==========moveable第三方组件的缩放事件================
 function onResize(e: OnResize) {
     // HACK: 移动时机早于 异步的页面更新，导致文字超出框
-    selectedTarget.value.style.width = e.width + 'px'
-    selectedTarget.value.style.height = e.height + 'px'
+    e.target.style.width = e.width + 'px'
+    e.target.style.height = e.height + 'px'
 
-    selectedNode.value.layout.width = e.width
-    selectedNode.value.layout.height = e.height
+    const node = getNodeByTarget(e.target as HTMLElement)
+
+    node.layout.width = e.width
+    node.layout.height = e.height
+
 
     // HACK: 往左边缩放会跑去缩放右边，得手动更新X、Y轴
     onDrag(e.drag)
@@ -107,8 +115,35 @@ function onResize(e: OnResize) {
 // =========点击画布让选中的元素清空==================
 function onClearSelected() {
     selectedTarget.value = null
-    selectedNodeId.value = null
+    editorSotre.clearSelected()
 }
+
+/**
+ * 框选和多选功能
+ */
+// 框选后拿到选中的元素
+const stageRef = useTemplateRef('stage')
+function onSelectEnd(e){
+    selectedTarget.value = e.selected
+    // 获取Id
+    const idList = e.selected.map(ele=>ele.getAttribute('data-node-id'))
+    editorSotre.selectedNodes(idList)
+}
+// 框选后成组拖拽
+function onDragGroup(e:OnDragGroup){
+    e.events.forEach(onDrag)
+}
+// 框选辅助方法-根据ele获取id,然后根据Id获取node
+function getNodeByTarget(ele:HTMLElement){
+    const id = ele.getAttribute('data-node-id')
+    const node = editorSotre.findNode(id)
+    return node
+}
+// 框选后成组缩放
+function onResizeGroup(e:OnResizeGroup){
+    e.events.forEach(onResize)
+}
+
 </script>
 
 <style scoped lang="scss">
