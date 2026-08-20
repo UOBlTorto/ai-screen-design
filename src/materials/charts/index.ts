@@ -1,10 +1,11 @@
-import type { MaterialDefinition } from '../type'
+import type { MaterialDefinition } from '@/schema/material'
 
 const chartsMaterial: MaterialDefinition = {
   name: '柱状图',
   group: 'charts',
   icon: 'fluent-color:list-bar-16',
 
+  setters:[],
   schema: {
     // dsl
     type: 'charts',
