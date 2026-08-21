@@ -6,7 +6,9 @@
                     <el-form-item :label="setterItem.label">
                         <component :is="componentMap[setterItem.type]"
                             :modelValue="getValue(selectedNode, setterItem.key)"
-                            @update:modelValue="(val) => applyChange(selectedNode, setterItem.key, val)"></component>
+                            @update:modelValue="(val) => applyChange(selectedNode, setterItem.key, val)"
+                            @focus="startBatch" @blur="commitBatch"
+                            ></component>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -29,7 +31,7 @@ const componentMap = {
     color: ElColorPicker
 }
 // 撤销重做
-const { applyChange } = useUndoRedo()
+const { applyChange,startBatch,commitBatch } = useUndoRedo()
 </script>
 
 <style scoped></style>
