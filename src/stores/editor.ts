@@ -1,8 +1,11 @@
+import { useUndoRedo } from '@/composables/useUndoRedo'
 import type { MaterialSchema } from '@/schema/material'
 import type { PageSchema } from '@/schema/page'
 import { defineStore } from 'pinia'
 
 export const useEditorStore = defineStore('editor', () => {
+  const { applyChange } = useUndoRedo()
+
   // 控制工具栏按钮进行画布面板的显示与隐藏
   const panelVisible = reactive({
     material: true,
@@ -31,7 +34,7 @@ export const useEditorStore = defineStore('editor', () => {
   const selectedNode = computed(() => nodes.value.find((item) => item.id === selectedNodeId.value))
 
   function addNode(node: MaterialSchema) {
-    nodes.value.push(node)
+    setNodes([...nodes.value, node])
   }
   function selectNode(id: string) {
     // selectedNodeId.value = id
@@ -62,23 +65,34 @@ export const useEditorStore = defineStore('editor', () => {
     selectNode(newNode.id)
   }
   function removeNode(node: MaterialSchema) {
-    nodes.value = nodes.value.filter((item) => item.id !== node.id)
+    setNodes(nodes.value.filter((item) => item.id !== node.id))
     selectedNodeIdList.value = selectedNodeIdList.value.filter((id) => id !== node.id)
   }
   function moveTop(node: MaterialSchema) {
     const index = nodes.value.findIndex((item) => item.id === node.id)
-    nodes.value.splice(index, 1)
-    nodes.value.unshift(node)
+    const splicedNodes = nodes.value.toSpliced(index, 1)
+    setNodes([node,...splicedNodes])
   }
   function moveBottom(node: MaterialSchema) {
     const index = nodes.value.findIndex((item) => item.id === node.id)
-    nodes.value.splice(index, 1)
-    nodes.value.push(node)
+    const splicedNodes = nodes.value.toSpliced(index, 1)
+    setNodes([...splicedNodes,node])
   }
   function toggleLock(node: MaterialSchema) {
     node.locked = !node.locked
+    applyChange(node,'locked',!node.locked)
   }
 
+  /**
+   * 批处理功能
+   * 关键逻辑：
+   * const {applyChange} = useUndoRedo()
+   * addNode时
+   */
+
+  function setNodes(newnodes){
+    applyChange(nodes,'value',newnodes)
+  }
   return {
     canvas,
     page,

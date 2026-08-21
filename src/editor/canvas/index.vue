@@ -27,9 +27,13 @@
 
         <!-- 移动、缩放 节点 -->
         <Moveable ref="moveable" :target="selectedTarget" :origin="false" :draggable="true" @drag="onDrag"
-            @drag-group="onDragGroup" @resize-group="onResizeGroup" :resizable="true" @resize="onResize"></Moveable>
+            @drag-group="onDragGroup" @resize-group="onResizeGroup" :resizable="true" @resize="onResize"
+            @drag-start="onStart" @drag-end="onEnd" @resize-start="onStart" @resize-end="onEnd"
+            @drag-group-start="onStart" @drag-group-end="onEnd" @resize-group-start="onStart" @resize-group-end="onEnd"
+            ></Moveable>
         <Selecto v-if="stageRef" :container="stageRef" :dragContainer="stageRef" :selectable-targets="['.canvas-node']"
-            @select-end="onSelectEnd" :select-from-inside="false"></Selecto>
+            @select-end="onSelectEnd" :select-from-inside="false"
+            ></Selecto>
     </div>
 </template>
 
@@ -74,8 +78,10 @@ const {
     onResize,
     onDrag,
     onResizeGroup,
-    onDragGroup
-} = useMoveable()
+    onDragGroup,
+    onStart,
+    onEnd
+} = useMoveable(moveableRef)
 //   框选逻辑
 const {
     onSelect,

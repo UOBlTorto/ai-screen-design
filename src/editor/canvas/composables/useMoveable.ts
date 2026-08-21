@@ -1,9 +1,23 @@
+import { useUndoRedo } from '@/composables/useUndoRedo'
 import { useEditorStore } from '@/stores/editor'
-import  { type OnDrag, type OnDragGroup, type OnResize, type OnResizeGroup } from 'vue3-moveable'
+import { type OnDrag, type OnDragGroup, type OnResize, type OnResizeGroup } from 'vue3-moveable'
 
-export function useMoveable() {
+export function useMoveable(moveableRef) {
   const editorStore = useEditorStore()
+  const { applyChange, startBatch, commitBatch } = useUndoRedo()
+  watch(()=>editorStore.nodes.map(node=>node.layout),()=>{
+    moveableRef.value.updateRect(undefined,true)
+  },{
+    flush:'post'
+  })
 
+  // 批处理功能--拖拽
+  function onStart() {
+    startBatch()
+  }
+  function onEnd() {
+    commitBatch()
+  }
 
   // ==========moveable第三方组件的拖动事件================
   function onDrag(e: OnDrag) {
@@ -13,8 +27,11 @@ export function useMoveable() {
 
     const node = getNodeByTarget(e.target as HTMLElement)
 
-    node.layout.x = e.left
-    node.layout.y = e.top
+    applyChange(node, 'layout', {
+      ...node.layout,
+      x: e.left,
+      y: e.top,
+    })
   }
   // ==========moveable第三方组件的缩放事件================
   function onResize(e: OnResize) {
@@ -26,6 +43,11 @@ export function useMoveable() {
 
     node.layout.width = e.width
     node.layout.height = e.height
+    applyChange(node, 'layout', {
+      ...node.layout,
+      width: e.width,
+      height: e.height,
+    })
 
     // HACK: 往左边缩放会跑去缩放右边，得手动更新X、Y轴
     onDrag(e.drag)
@@ -48,6 +70,8 @@ export function useMoveable() {
     onResize,
     onDrag,
     onResizeGroup,
-    onDragGroup
+    onDragGroup,
+    onStart,
+    onEnd
   }
 }
