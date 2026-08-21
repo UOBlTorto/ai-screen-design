@@ -93,6 +93,12 @@ export const useEditorStore = defineStore('editor', () => {
   function setNodes(newnodes){
     applyChange(nodes,'value',newnodes)
   }
+
+
+  function updateNode(id,newNode){
+    const newNodeList=nodes.value.map(node=>node.id===id?newNode:node)
+    setNodes(newNodeList)
+  }
   return {
     canvas,
     page,
@@ -114,5 +120,7 @@ export const useEditorStore = defineStore('editor', () => {
     moveTop,
     toggleLock,
     removeNode,
+
+    updateNode,
   }
 })
