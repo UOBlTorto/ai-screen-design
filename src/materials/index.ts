@@ -19,7 +19,7 @@ function register(material:MaterialDefinition,component:Component){
     componentMap.set(material.schema.type,component)
     settersMap.set(material.schema.type,material.setters)
 }
-const materiaMosdulel = import.meta.glob('@/materials/*/*.ts',{eager:true})
+const materiaMosdulel = import.meta.glob('@/materials/*/index.ts',{eager:true})
 for(const key in materiaMosdulel){
     const item = materiaMosdulel[key]
     // @ts-ignore

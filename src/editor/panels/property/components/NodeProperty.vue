@@ -35,7 +35,7 @@ const { selectedNode } = storeToRefs(editorStore)
     }
   ],
  */
-const setters = getSetters(selectedNode.value.type)
+const setters = computed(()=>getSetters(selectedNode.value.type))
 
 const layoutSetters = [
     {

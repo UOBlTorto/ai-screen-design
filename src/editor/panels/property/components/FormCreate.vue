@@ -8,6 +8,7 @@
                             :modelValue="getValue(selectedNode, setterItem.key)"
                             @update:modelValue="(val) => applyChange(selectedNode, setterItem.key, val)"
                             @focus="startBatch" @blur="commitBatch"
+                            v-bind="setterItem.props"
                             ></component>
                     </el-form-item>
                 </el-col>
@@ -17,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ElColorPicker, ElInput, ElInputNumber } from 'element-plus';
+import { ElCheckbox, ElColorPicker, ElInput, ElInputNumber, ElSelect } from 'element-plus';
 import { getValue } from '@/utils';
 import { useUndoRedo } from '@/composables/useUndoRedo';
 
@@ -28,7 +29,9 @@ defineProps(['setters', 'selectedNode'])
 const componentMap = {
     input: ElInput,
     number: (props) => h(ElInputNumber, { precision: 0, ...props }),
-    color: ElColorPicker
+    color: ElColorPicker,
+    checkbox:ElCheckbox,
+    select:ElSelect,
 }
 // 撤销重做
 const { applyChange,startBatch,commitBatch } = useUndoRedo()
