@@ -1,5 +1,5 @@
 <template>
-    <div class="chart-material w-full h-full" ref="chart">
+    <div class="chart-material w-full h-full" ref="chartRef">
 
     </div>
 </template>
@@ -11,7 +11,7 @@ defineOptions({
     name: 'ChartMaterial'
 })
 const props = defineProps<{ schema: MaterialSchema }>()
-const chartRef = useTemplateRef('chart')
+const chartRef = useTemplateRef('chartRef')
 let chart:EChartsType
 onMounted(() => {
     chart = init(chartRef.value)
