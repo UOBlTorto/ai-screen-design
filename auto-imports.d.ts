@@ -16,6 +16,7 @@ declare global {
   const ElIn: typeof import('element-plus/es').ElIn
   const ElInput: typeof import('element-plus/es').ElInput
   const ElInputNumber: typeof import('element-plus/es').ElInputNumber
+  const ElMe: typeof import('element-plus/es').ElMe
   const ElSe: typeof import('element-plus/es').ElSe
   const computed: typeof import('vue').computed
   const createApp: typeof import('vue').createApp
