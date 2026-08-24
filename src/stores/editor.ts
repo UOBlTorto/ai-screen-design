@@ -1,7 +1,7 @@
 import { useUndoRedo } from '@/composables/useUndoRedo'
 import type { MaterialSchema } from '@/schema/material'
 import type { PageSchema } from '@/schema/page'
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange } = useUndoRedo()
@@ -22,7 +22,48 @@ export const useEditorStore = defineStore('editor', () => {
     },
     // 这个nodes理论上和上面那个nodes一样，但是我们把这里聚合起来
     nodes: [],
+    dataSources: [
+      {
+        type: 'static',
+        id: '123test',
+        name: '销售量',
+        data: [
+          {
+            label: '一月',
+            value: 100,
+          },
+          {
+            label: '二月',
+            value: 200,
+          },
+          {
+            label: '三月',
+            value: 300,
+          },
+        ],
+      },
+      {
+        type: 'static',
+        id: '456test',
+        name: '访问量',
+        data: [
+          {
+            label: '一月',
+            value: 1000,
+          },
+          {
+            label: '二月',
+            value: 2000,
+          },
+          {
+            label: '三月',
+            value: 3000,
+          },
+        ],
+      },
+    ],
   })
+
   const canvas = toRef(page.value, 'canvas')
 
   // 选中节点拖放和缩放相关变量----单选
@@ -32,6 +73,9 @@ export const useEditorStore = defineStore('editor', () => {
     selectedNodeIdList.value.length === 1 ? selectedNodeIdList.value[0] : null,
   )
   const selectedNode = computed(() => nodes.value.find((item) => item.id === selectedNodeId.value))
+
+  // 数据源
+  const dataSources = toRef(page.value, 'dataSources')
 
   function addNode(node: MaterialSchema) {
     setNodes([...nodes.value, node])
@@ -71,16 +115,16 @@ export const useEditorStore = defineStore('editor', () => {
   function moveTop(node: MaterialSchema) {
     const index = nodes.value.findIndex((item) => item.id === node.id)
     const splicedNodes = nodes.value.toSpliced(index, 1)
-    setNodes([node,...splicedNodes])
+    setNodes([node, ...splicedNodes])
   }
   function moveBottom(node: MaterialSchema) {
     const index = nodes.value.findIndex((item) => item.id === node.id)
     const splicedNodes = nodes.value.toSpliced(index, 1)
-    setNodes([...splicedNodes,node])
+    setNodes([...splicedNodes, node])
   }
   function toggleLock(node: MaterialSchema) {
     node.locked = !node.locked
-    applyChange(node,'locked',!node.locked)
+    applyChange(node, 'locked', !node.locked)
   }
 
   /**
@@ -90,21 +134,20 @@ export const useEditorStore = defineStore('editor', () => {
    * addNode时
    */
 
-  function setNodes(newnodes){
-    applyChange(nodes,'value',newnodes)
+  function setNodes(newnodes) {
+    applyChange(nodes, 'value', newnodes)
   }
 
-
-  function updateNode(id,newNode){
-    const newNodeList=nodes.value.map(node=>node.id===id?newNode:node)
+  function updateNode(id, newNode) {
+    const newNodeList = nodes.value.map((node) => (node.id === id ? newNode : node))
     setNodes(newNodeList)
   }
 
   /**
    * 页面schema的导入导出
    */
-  function setPage(newPage:PageSchema){
-    Object.assign(page.value,newPage)
+  function setPage(newPage: PageSchema) {
+    Object.assign(page.value, newPage)
   }
   return {
     canvas,
@@ -114,6 +157,8 @@ export const useEditorStore = defineStore('editor', () => {
     nodes,
     selectedNode,
     selectedNodeId,
+
+    dataSources,
 
     selectedNodeIdList,
     selectedNodes,

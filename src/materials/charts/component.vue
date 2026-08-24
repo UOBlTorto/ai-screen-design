@@ -6,32 +6,58 @@
 
 <script setup lang="ts">
 import type { MaterialSchema } from '@/schema/material';
-import { init,type EChartsType } from 'echarts'
+import { init, type EChartsType } from 'echarts'
+import { useDataSources } from '../../composables/useDataSources';
 defineOptions({
     name: 'ChartMaterial'
 })
 const props = defineProps<{ schema: MaterialSchema }>()
 const chartRef = useTemplateRef('chartRef')
-let chart:EChartsType
+let chart: EChartsType
+
+const dataId = computed(() => props.schema.dataId)
+const { data } = useDataSources(dataId)
+
+const option = computed(() => {
+    const _option = props.schema.props.option
+    return {
+        ..._option,
+        dataset: {
+            ..._option.dataset,
+            source: data.value || _option.dataset.source,
+        }
+    }
+})
+
+function renderChart() {
+    if (!chartRef.value) return
+    if (!chart) {
+        chart = init(chartRef.value)
+    }
+    chart.setOption(option.value, { notMerge: true })
+}
+
 onMounted(() => {
-    chart = init(chartRef.value)
-    chart.setOption(props.schema.props.option)
+    renderChart()
 
     const observer = new ResizeObserver(() => {
-        chart.resize()
+        chart?.resize()
 
     })
 
     observer.observe(chartRef.value)
 
-    onBeforeUnmount(()=>{
+    onBeforeUnmount(() => {
         observer.disconnect()
         chart.dispose()
     })
 })
-watch(()=>props.schema.props.option,()=>{
-    chart.setOption(props.schema.props.option)
-},{deep:true})
+// 数据源或 option 任意变化都重新渲染图表
+watch(
+    [() => props.schema.props.option, data],
+    () => renderChart(),
+    { deep: true },
+)
 </script>
 
 <style scoped lang="scss">
