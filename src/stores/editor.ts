@@ -99,6 +99,13 @@ export const useEditorStore = defineStore('editor', () => {
     const newNodeList=nodes.value.map(node=>node.id===id?newNode:node)
     setNodes(newNodeList)
   }
+
+  /**
+   * 页面schema的导入导出
+   */
+  function setPage(newPage:PageSchema){
+    Object.assign(page.value,newPage)
+  }
   return {
     canvas,
     page,
@@ -122,5 +129,7 @@ export const useEditorStore = defineStore('editor', () => {
     removeNode,
 
     updateNode,
+
+    setPage,
   }
 })

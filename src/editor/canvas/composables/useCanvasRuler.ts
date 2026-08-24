@@ -27,8 +27,8 @@ export function useCanvasRuler({canvasRootRef,moveableRef}) {
   const canvasRootWidth = ref(1000)
   const canvasRootHeight = ref(800)
 
-  const canvasWidth = toRef(canvas.value, 'width')
-  const canvasHeight = toRef(canvas.value, 'height')
+  const canvasWidth = computed(()=>canvas.value.width)
+  const canvasHeight = computed(()=>canvas.value.height)
   const canvasStyle = computed(() => {
     return {
       width: canvasWidth.value + 'px',
