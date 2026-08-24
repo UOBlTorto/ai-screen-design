@@ -7,24 +7,32 @@
                 <Icon icon="si:json-duotone"></Icon>
             </span>
         </div>
-        <!-- 属性主体 -->
-        <el-collapse v-model="active" according>
-            <el-collapse-item title="布局属性" name="layout">
-                <FormCreate :setters="layoutSetters" :selected-node="selectedNode"></FormCreate>
-            </el-collapse-item>
-            <el-collapse-item title="组件属性" name="node">
-                <FormCreate :setters="setters" :selected-node="selectedNode"></FormCreate>
-            </el-collapse-item>
-        </el-collapse>
+        <el-tabs v-model="activeTab" stretch>
+            <el-tab-pane label="属性" name="property">
+                <!-- 属性主体 -->
+                <el-collapse v-model="active" accordion>
+                    <el-collapse-item title="布局属性" name="layout">
+                        <FormCreate :setters="layoutSetters" :selected-node="selectedNode"></FormCreate>
+                    </el-collapse-item>
+                    <el-collapse-item title="组件属性" name="node">
+                        <FormCreate :setters="setters" :selected-node="selectedNode"></FormCreate>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-tab-pane>
+            <el-tab-pane label="数据源" name="data-source">
+                <DataSources></DataSources>
+            </el-tab-pane>
+        </el-tabs>
+
         <!-- 弹窗 -->
-         <el-drawer destroy-on-close v-model="visible" title="编辑 JSON" size="800">
+        <el-drawer destroy-on-close v-model="visible" title="编辑 JSON" size="800">
             <MonacoEditor v-model="jsonText"></MonacoEditor>
 
             <template #footer>
-                <el-button @click="visible=false">取消</el-button>
+                <el-button @click="visible = false">取消</el-button>
                 <el-button type="primary" @click="onConfirm">确认</el-button>
             </template>
-         </el-drawer>
+        </el-drawer>
     </div>
 </template>
 
@@ -33,6 +41,7 @@ import { getSetters } from '@/materials';
 import { useEditorStore } from '@/stores/editor';
 import { storeToRefs } from 'pinia';
 import FormCreate from './FormCreate.vue';
+import DataSources from './DataSources.vue';
 defineOptions({
     name: 'NodeProperty'
 })
@@ -40,6 +49,7 @@ const visible = ref(false)
 const jsonText = ref('')
 const editorStore = useEditorStore()
 const { selectedNode } = storeToRefs(editorStore)
+const activeTab = ref('property')
 
 /**
  *   setters:[
@@ -85,16 +95,16 @@ const layoutSetters = [
 //element折叠面板激活属性
 const active = ref('node')
 // 点击预览
-function previewJson(){
-    jsonText.value = JSON.stringify(selectedNode.value,null,2)
+function previewJson() {
+    jsonText.value = JSON.stringify(selectedNode.value, null, 2)
     visible.value = true
 }
-function  onConfirm(){
+function onConfirm() {
     const newNode = JSON.parse(jsonText.value)
-    editorStore.updateNode(selectedNode.value.id,{
+    editorStore.updateNode(selectedNode.value.id, {
         ...newNode,
-        id:selectedNode.value.id,
-        type:selectedNode.value.type
+        id: selectedNode.value.id,
+        type: selectedNode.value.type
     })
     visible.value = false
 }
