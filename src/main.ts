@@ -8,6 +8,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@/styles/index.css'
 import { Icon } from '@iconify/vue'
 
+import '@/mock/data.ts'
 
 const app = createApp(App)
 
