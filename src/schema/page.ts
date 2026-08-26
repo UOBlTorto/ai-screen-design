@@ -18,6 +18,17 @@ export interface DataSourceSchema{
    * 数据源载体
    */
   data:any
+  /**
+   * 接口请求地址
+   */
+  url?:string
+  intervel?:number
+  /**
+   * 预设参数 会发送给后端
+   */
+  params?:{
+    date:string
+  }
 
 }
 export interface PageSchema {
