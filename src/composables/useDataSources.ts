@@ -17,7 +17,15 @@ export function useDataSources(dataId: Ref<string>) {
       // 接口请求
       const url = source.value.url
       try {
-        const res = await axios.get(url)
+        const search = new URLSearchParams(location.search)
+        const params = Object.fromEntries(search.entries())
+        const res = await axios.get(url,{
+          params:{
+            ...source.value.params,
+            // url上的参数优先级比预设参数高,运行覆盖
+            ...params
+          }
+        })
         data.value = res.data
       } finally {
         if (source.value.intervel) {

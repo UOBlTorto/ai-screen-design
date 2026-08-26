@@ -23,6 +23,12 @@ export interface DataSourceSchema{
    */
   url?:string
   intervel?:number
+  /**
+   * 预设参数 会发送给后端
+   */
+  params?:{
+    date:string
+  }
 
 }
 export interface PageSchema {
