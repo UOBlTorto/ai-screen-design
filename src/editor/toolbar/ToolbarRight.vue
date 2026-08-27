@@ -6,8 +6,8 @@
         <span @click="previewJson">
             <Icon icon="si:json-duotone"></Icon>
         </span>
-        <span>
-            <Icon icon="entypo:publish"></Icon>
+        <span @click="dataSourceVisible=true">
+            <Icon icon="mdi:database"></Icon>
         </span>
         <span @click="onImport">
             <Icon icon="mdi:import"></Icon>
@@ -17,13 +17,21 @@
             <Icon icon="mdi:export"></Icon>
         </span>
         <input type="file" v-show="false" ref="inputRef" @change="onChange"/>
-        <el-drawer title="编辑JSON" size="800" v-model="visible">
+        <el-drawer destory-on-close title="编辑JSON" size="800" v-model="visible">
             <MonacoEditor v-model="jsonText"></MonacoEditor>
             <template #footer>
                 <el-button>取消</el-button>
                 <el-button @click="onConfirm" type="primary">确认</el-button>
             </template>
         </el-drawer>
+        <!-- 数据源管理界面弹出框 -->
+         <el-dialog destory-on-close title="数据源配置" v-model="dataSourceVisible" width="800">
+            <DataSourceManange ref="dataSourceManangeRef"></DataSourceManange>
+            <template #footer>
+                <el-button @click="dataSourceVisible=false">取消</el-button>
+                <el-button @click="onSave">确认</el-button>
+            </template>
+         </el-dialog>
     </div>
 </template>
 
@@ -32,14 +40,19 @@ import MonacoEditor from '@/components/MonacoEditor/index.vue'
 import { useEditorStore } from '@/stores/editor'
 import { ElMessage } from 'element-plus'
 import { storeToRefs } from 'pinia'
+import DataSourceManange from './components/DataSourceManange.vue'
 defineOptions({
     name: 'ToolBarRight'
 })
 const editorStore = useEditorStore()
 const { page } = storeToRefs(editorStore)
 
+const dataSourceVisible = ref(false)
 const jsonText = ref('')
 const visible = ref(false)
+
+const dataSourceManangeRef = ref()
+
 function previewJson() {
     visible.value = true
     jsonText.value = JSON.stringify(page.value,null,2)
@@ -80,6 +93,12 @@ async function onChange(e){
     } catch (error) {
         ElMessage.error('请检查JSON 是否合法')
     }
+}
+
+
+function onSave(){
+    dataSourceManangeRef.value.save()
+    dataSourceVisible.value = false
 }
 </script>
 
